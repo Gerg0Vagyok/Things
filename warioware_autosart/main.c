@@ -22,11 +22,13 @@ int main() {
 
 		const char *valueName = "WarioWare";
 		const char *command = "cmd /c start " PAGE;
-		if (RegOpenKeyExA(	HKEY_LOCAL_MACHINE,
-							"Software\\Microsoft\\Windows\\CurrentVersion\\Run",
-							0, KEY_WRITE, &hKey) != ERROR_SUCCESS) {
-			printf("Failed to open registry key\n");
-			return 1;
+		LONG res = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_WRITE, &hKey);
+		if (res != ERROR_SUCCESS) {
+			res = RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_WRITE, &hKey);
+			if (res != ERROR_SUCCESS) {
+				printf("Failed to open registry key\n");
+				return 1;
+			}
 		}
 
 		if (RegSetValueExA(	hKey, valueName, 0, REG_SZ, (const BYTE*)command,
@@ -41,10 +43,17 @@ int main() {
 		FILE *file = fopen("/etc/xdg/autostart/warioware.desktop", "w");
 		if (!file) {
 			perror("GuessNot\n");
-		} else {
-			fprintf(file, "[Desktop Entry]\nType=Application\nExec=xdg-open " PAGE "\nHidden=false\nNoDisplay=false\nX-GNOME-Autostart-enabled=true\nName=WarioWare");
+			char *home = getenv("HOME");
+			char path[256];
+			snprintf(path, sizeof(path), "%s/.config/autostart/warioware.desktop", home);
+			file = fopen(path, "w");
+			if (!file) {
+				perror("Failed to write user autostart");
+				return 1;
+			} 
 		}
-		system("xdg-open " PAGE);
+		fprintf(file, "[Desktop Entry]\nType=Application\nExec=xdg-open " PAGE "\nHidden=false\nNoDisplay=false\nX-GNOME-Autostart-enabled=true\nName=WarioWare");
+		fclose(file);
 	#endif
 	return 0;
 }
