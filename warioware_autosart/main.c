@@ -1,8 +1,14 @@
 // UNTESTED - Probably works tho.
+// For Windows:
+//   x86_64-w64-mingw32-gcc -static main.c -o warioware.exe
+// For Linux:
+//   gcc -static main.c -o warioware
+// I dont own a Mac nor have skd for Mac compiling so RIP Mac users.
+// It also has everything in it so using it is a piece of cake, no dependencies i think.
 
 #ifdef _WIN32
-#include <windows/windows.h>
-#include <windows/stdio.h>
+#include <windows.h>
+#include <stdio.h>
 #else
 #include <stdlib.h>
 #include <stdio.h>
